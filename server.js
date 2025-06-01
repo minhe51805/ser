@@ -14,10 +14,21 @@ const PORT = process.env.PORT || 3001;
 // Store active streams
 const activeStreams = new Map();
 
-// Serve static files from Flutter web build
-app.use(express.static(path.join(__dirname, '../build/web')));
+// API routes
+app.get('/', (req, res) => {
+  res.json({
+    status: 'OK',
+    message: 'Exam Monitoring Server API',
+    timestamp: new Date().toISOString(),
+    activeStreams: activeStreams.size,
+    endpoints: [
+      'GET /api/health - Health check',
+      'GET /api - Server status',
+      'WebSocket - Socket.IO for video streaming'
+    ]
+  });
+});
 
-// Test route
 app.get('/api', (req, res) => {
   res.json({
     status: 'OK',
@@ -35,11 +46,6 @@ app.get('/api/health', (req, res) => {
     memory: process.memoryUsage(),
     connections: io.engine.clientsCount
   });
-});
-
-// Serve Flutter app for all other routes (must be after API routes)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build/web/index.html'));
 });
 
 io.on('connection', (socket) => {
